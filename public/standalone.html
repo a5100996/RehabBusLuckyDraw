@@ -917,7 +917,7 @@
             "BIND",
             "綁定ID",
           ]),
-          id: findHeaderIndex(headers, ["ID", "身分證", "身份證"]),
+          id: findHeaderIndex(headers, ["MASKID", "身分證", "身份證"]),
           idAll: findHeaderIndex(headers, [
             "IDALL",
             "ID_ALL",
@@ -955,24 +955,25 @@
           let phone = getValue(values, fieldMapping.phone) || "無";
           phone = cleanPhoneNumber(phone);
 
-          // 處理身分證號碼
+          // 正確處理身分證號碼 - 保持原始 CSV 的 ID 欄位值
           let id = getValue(values, fieldMapping.id) || "";
-          let idAll = getValue(values, fieldMapping.idAll) || id;
+          let idAll = getValue(values, fieldMapping.idAll) || "";
 
-          // 如果 ID 被遮罩，嘗試使用 IDALL
-          if (id.includes("*")) {
-            id = idAll;
+          // 如果沒有 idAll，則使用 id
+          if (!idAll && id) {
+            idAll = id;
           }
 
           const participant = {
             name: name.trim(),
             bindId: getValue(values, fieldMapping.bindId) || "",
-            id: id,
-            idAll: idAll,
+            id: id, // 保持原始 CSV 的 ID 欄位值（可能是遮罩的）
+            idAll: idAll, // 完整的身分證號碼
             phone: phone,
           };
 
           participants.push(participant);
+          console.log("解析的參與者:", participant); // 除錯用
         }
 
         if (participants.length === 0) {
